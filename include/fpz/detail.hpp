@@ -8,6 +8,11 @@ template <class T>
 constexpr unsigned get_stream_block_size();
 
 template <class T>
+constexpr unsigned get_com_byte();
+template <class T>
+constexpr unsigned get_raw_byte();
+
+template <class T>
 void decompose(
 		byte_t* const dst_com_ptr,
 		byte_t* const dst_raw_ptr,
