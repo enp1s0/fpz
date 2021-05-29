@@ -8,7 +8,7 @@
 
 namespace fpz {
 using zdata_t = std::pair<std::unique_ptr<typename fpz::byte_t[]>, std::size_t>;
-zdata_t compress(
+zdata_t deflate(
 		const typename fpz::byte_t* const src_ptr,
 		const std::size_t src_len
 		) {

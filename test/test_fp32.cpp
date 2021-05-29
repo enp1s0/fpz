@@ -36,7 +36,7 @@ void test() {
 		);
 
 	// compress
-	auto [compressed_data, compressed_size] = fpz::compress(com_array.data(), fpz::get_com_byte<T>() * N);
+	auto [compressed_data, compressed_size] = fpz::deflate(com_array.data(), fpz::get_com_byte<T>() * N);
 	const auto uncompressed_size = fpz::get_com_byte<T>() * N;
 	std::printf("Compression rate : %luByte -> %lu (%7.3f)\n", uncompressed_size, compressed_size, 100. * compressed_size / uncompressed_size);
 
