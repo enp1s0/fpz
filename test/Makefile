@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-std=c++14 -I../include
+CXXFLAGS=-std=c++17 -I../include -lz
 
 TARGET=test_fp32.cpp.test
 
