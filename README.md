@@ -1,6 +1,6 @@
 # fpz
 
-a teader-only C++ library for floating point array compression
+A header-only C++ library for floating point array compression
 
 ## Features
 
