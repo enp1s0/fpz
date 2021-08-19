@@ -41,16 +41,16 @@ void test() {
 		);
 
 	// deflate
-	auto [compressed_data, compressed_size] = fpz::deflate(com_array.data(), fpz::get_com_byte<T>() * N);
-	const auto uncompressed_size = fpz::get_com_byte<T>() * N;
-	const auto raw_part_size = fpz::get_raw_byte<T>() * N;
+	auto [compressed_data, compressed_size] = fpz::deflate(com_array.data(), fpz::get_com_byte<T>() * fpz::get_num_stream_blocks<T>(N));
+	const auto uncompressed_size = fpz::get_com_byte<T>() * fpz::get_num_stream_blocks<T>(N);
+	const auto raw_part_size = fpz::get_raw_byte<T>() * fpz::get_num_stream_blocks<T>(N);
 	std::printf("Exponent compression rate : %luByte -> %luByte (%7.3f)\n", uncompressed_size, compressed_size, 100. * compressed_size / uncompressed_size);
 	std::printf("Total compression rate    : %luByte -> %luByte (%7.3f)\n", uncompressed_size + raw_part_size,
 				compressed_size + raw_part_size,
 				100. * (compressed_size + raw_part_size) / (uncompressed_size + raw_part_size));
 
 	// inflate
-	fpz::inflate(com_array.data(), fpz::get_com_byte<T>() * N, std::make_pair(std::move(compressed_data), compressed_size));
+	fpz::inflate(com_array.data(), fpz::get_com_byte<T>() * fpz::get_num_stream_blocks<T>(N), std::make_pair(std::move(compressed_data), compressed_size));
 
 	// compose
 	fpz::compose(
@@ -59,6 +59,7 @@ void test() {
 		raw_array.data(),
 		N
 		);
+
 
 	// validate
 	std::size_t num_errors = 0;

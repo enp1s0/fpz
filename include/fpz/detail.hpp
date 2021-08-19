@@ -18,6 +18,16 @@ std::size_t get_num_stream_blocks(const std::size_t num_elements) {
 }
 
 template <class T>
+std::size_t get_stream_com_blocks_bytes(const std::size_t num_elements) {
+	return get_num_stream_blocks<T>(num_elements) * get_com_byte<T>();
+}
+
+template <class T>
+std::size_t get_stream_raw_blocks_bytes(const std::size_t num_elements) {
+	return get_num_stream_blocks<T>(num_elements) * get_raw_byte<T>();
+}
+
+template <class T>
 void decompose(
 		byte_t* const dst_com_ptr,
 		byte_t* const dst_raw_ptr,
