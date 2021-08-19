@@ -1,5 +1,5 @@
-#ifndef __FPZ_FPZ_F32_GPP__
-#define __FPZ_FPZ_F32_GPP__
+#ifndef __FPZ_FPZ_F32_HPP__
+#define __FPZ_FPZ_F32_HPP__
 #include "detail.hpp"
 
 namespace fpz {
