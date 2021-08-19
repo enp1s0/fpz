@@ -9,7 +9,7 @@ A header-only C++ library for floating point array compression
 
 ## Supported FP
 - [x] IEEE Binary32 (FP32)
-- [ ] IEEE Binary64 (FP64)
+- [x] IEEE Binary64 (FP64)
 
 ## Compression method
 
@@ -18,7 +18,7 @@ A header-only C++ library for floating point array compression
 
 ## Example
 
-See [test_fp32.cpp](./test/test_fp32.cpp).
+See [compression_decompress.cpp](./test/compress_decompress.cpp).
 
-# License
+## License
 MIT
