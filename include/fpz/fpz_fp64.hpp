@@ -5,24 +5,24 @@
 namespace fpz {
 
 template <>
-constexpr unsigned get_stream_block_size<double>(){return 2;}
+constexpr std::size_t get_stream_block_size<double>(){return 2;}
 template <>
-constexpr unsigned get_com_byte<double>(){return 3;};
+constexpr std::size_t get_com_byte<double>(){return 3;};
 template <>
-constexpr unsigned get_raw_byte<double>(){return 13;};
+constexpr std::size_t get_raw_byte<double>(){return 13;};
 
 template <>
 void decompose<double>(
 		byte_t* const dst_com_ptr,
 		byte_t* const dst_raw_ptr,
 		const double* const src_ptr,
-		const unsigned num_elements 
+		const std::size_t num_elements
 		) {
 	union reinterpretor {
 		std::uint64_t bs;
 		double fp;
 	};
-	for (unsigned i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
+	for (std::size_t i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
 		const auto block_filled = (num_elements - get_stream_block_size<double>() * i) > 1;
 		const auto bs0 = reinterpretor{.fp = src_ptr[get_stream_block_size<double>() * i + 0]}.bs;
 		const auto bs1 = block_filled ? reinterpretor{.fp = src_ptr[get_stream_block_size<double>() * i + 1]}.bs : 0lu;
@@ -56,13 +56,13 @@ void compose<double>(
 		double* const dst_ptr,
 		const byte_t* const src_com_ptr,
 		const byte_t* const src_raw_ptr,
-		const unsigned num_elements
+		const std::size_t num_elements
 		) {
 	union reinterpretor {
 		std::uint64_t bs;
 		double fp;
 	};
-	for (unsigned i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
+	for (std::size_t i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
 		// Store exponent and sign
 		uint64_t exponent_sign0 = 0, exponent_sign1 = 0;
 		exponent_sign0 |=  src_com_ptr[i * get_com_byte<double>() + 0] << 8;
