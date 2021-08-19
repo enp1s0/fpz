@@ -3,15 +3,20 @@
 #include <vector>
 #include <fpz/fpz.hpp>
 
-
 constexpr std::size_t N = 1lu << 20;
 
 template <class T>
+const char* get_type_name_str();
+template <> const char* get_type_name_str<float >() {return "float" ;}
+template <> const char* get_type_name_str<double>() {return "double";}
+
+template <class T>
 void test() {
+	std::printf("### TEST for %s ###\n", get_type_name_str<T>());
 	std::vector<T> input_array(N);
 	std::vector<T> output_array(N);
-	std::vector<typename fpz::byte_t> com_array(fpz::get_com_byte<T>() * N);
-	std::vector<typename fpz::byte_t> raw_array(fpz::get_raw_byte<T>() * N);
+	std::vector<typename fpz::byte_t> com_array(fpz::get_com_byte<T>() * fpz::get_num_stream_blocks<T>(N));
+	std::vector<typename fpz::byte_t> raw_array(fpz::get_raw_byte<T>() * fpz::get_num_stream_blocks<T>(N));
 
 	std::mt19937 mt(0);
 	std::uniform_real_distribution<T> mantissa_dist(1, 2);
@@ -67,4 +72,5 @@ void test() {
 
 int main() {
 	test<float>();
+	test<double>();
 }
