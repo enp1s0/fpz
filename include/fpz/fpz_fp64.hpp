@@ -31,7 +31,7 @@ void decompose<double>(
 		const uint64_t exponent_sign0 = (bs0 >> 52);
 		const uint64_t exponent_sign1 = (bs1 >> 52);
 		dst_com_ptr[i * get_com_byte<double>() + 0] = exponent_sign0 >> 4;
-		dst_com_ptr[i * get_com_byte<double>() + 1] = (exponent_sign0 << 4) || (exponent_sign1 >> 4);
+		dst_com_ptr[i * get_com_byte<double>() + 1] = ((exponent_sign0 & 0xf) << 4) | (exponent_sign1 >> 8);
 		dst_com_ptr[i * get_com_byte<double>() + 2] = exponent_sign1 & 0xff;
 
 		// Store mantissa and sign
@@ -41,7 +41,7 @@ void decompose<double>(
 		dst_raw_ptr[i * get_raw_byte<double>() +  3] =  (bs0 >> 20) & 0xff;
 		dst_raw_ptr[i * get_raw_byte<double>() +  4] =  (bs0 >> 12) & 0xff;
 		dst_raw_ptr[i * get_raw_byte<double>() +  5] =  (bs0 >>  4) & 0xff;
-		dst_raw_ptr[i * get_raw_byte<double>() +  6] = ((bs0 & 0xf) << 4) || ((bs1 >> 48) & 0xf);
+		dst_raw_ptr[i * get_raw_byte<double>() +  6] = ((bs0 & 0xf) << 4) | ((bs1 >> 48) & 0xf);
 		dst_raw_ptr[i * get_raw_byte<double>() +  7] =  (bs1 >> 40) & 0xff;
 		dst_raw_ptr[i * get_raw_byte<double>() +  8] =  (bs1 >> 32) & 0xff;
 		dst_raw_ptr[i * get_raw_byte<double>() +  9] =  (bs1 >> 24) & 0xff;
@@ -65,10 +65,10 @@ void compose<double>(
 	for (std::size_t i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
 		// Store exponent and sign
 		uint64_t exponent_sign0 = 0, exponent_sign1 = 0;
-		exponent_sign0 |=  src_com_ptr[i * get_com_byte<double>() + 0] << 8;
-		exponent_sign0 |=  src_com_ptr[i * get_com_byte<double>() + 1] >> 4;
-		exponent_sign1 |= (src_com_ptr[i * get_com_byte<double>() + 1] & 0xf) << 8;
-		exponent_sign1 |=  src_com_ptr[i * get_com_byte<double>() + 2];
+		exponent_sign0 |=  static_cast<uint64_t>(src_com_ptr[i * get_com_byte<double>() + 0]) << 4;
+		exponent_sign0 |=  static_cast<uint64_t>(src_com_ptr[i * get_com_byte<double>() + 1]) >> 4;
+		exponent_sign1 |= (static_cast<uint64_t>(src_com_ptr[i * get_com_byte<double>() + 1]) & 0xf) << 8;
+		exponent_sign1 |=  static_cast<uint64_t>(src_com_ptr[i * get_com_byte<double>() + 2]);
 
 		// Store mantissa and sign
 		uint64_t mantissa0 = 0, mantissa1 = 0;
@@ -87,10 +87,10 @@ void compose<double>(
 		mantissa1 |=  (static_cast<uint64_t>(src_raw_ptr[i * get_raw_byte<double>() + 11]) <<  8);
 		mantissa1 |=  (static_cast<uint64_t>(src_raw_ptr[i * get_raw_byte<double>() + 12]));
 
-		dst_ptr[get_stream_block_size<double>() * i + 0] = reinterpretor{.bs = (exponent_sign0 | mantissa0)}.fp;
+		dst_ptr[get_stream_block_size<double>() * i + 0] = reinterpretor{.bs = ((exponent_sign0 << 52) | mantissa0)}.fp;
 		const auto block_filled = (num_elements - get_stream_block_size<double>() * i) > 1;
 		if (block_filled) {
-			dst_ptr[get_stream_block_size<double>() * i + 1] = reinterpretor{.bs = (exponent_sign1 | mantissa1)}.fp;
+			dst_ptr[get_stream_block_size<double>() * i + 1] = reinterpretor{.bs = ((exponent_sign1 << 52) | mantissa1)}.fp;
 		}
 	}
 }
