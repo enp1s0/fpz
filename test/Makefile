@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-std=c++17 -I../include -lz
+CXXFLAGS=-std=c++17 -I../include -lz -fopenmp
 
 TARGET=compress_decompress.cpp.test
 

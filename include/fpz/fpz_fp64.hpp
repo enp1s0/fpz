@@ -22,6 +22,7 @@ void decompose<double>(
 		std::uint64_t bs;
 		double fp;
 	};
+#pragma omp parallel for
 	for (std::size_t i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
 		const auto block_filled = (num_elements - get_stream_block_size<double>() * i) > 1;
 		const auto bs0 = reinterpretor{.fp = src_ptr[get_stream_block_size<double>() * i + 0]}.bs;
@@ -62,6 +63,7 @@ void compose<double>(
 		std::uint64_t bs;
 		double fp;
 	};
+#pragma omp parallel for
 	for (std::size_t i = 0; i < get_num_stream_blocks<double>(num_elements); i++) {
 		// Store exponent and sign
 		uint64_t exponent_sign0 = 0, exponent_sign1 = 0;

@@ -22,6 +22,7 @@ void decompose<float>(
 		std::uint32_t bs;
 		float fp;
 	};
+#pragma omp parallel for
 	for (std::size_t i = 0; i < num_stream_block * get_stream_block_size<float>(); i++) {
 		const auto bs = reinterpretor{.fp = src_ptr[i]}.bs;
 
@@ -48,6 +49,7 @@ void compose<float>(
 		std::uint32_t bs;
 		float fp;
 	};
+#pragma omp parallel for
 	for (std::size_t i = 0; i < num_stream_block * get_stream_block_size<float>(); i++) {
 		// Load mantissa and sign
 		const std::uint32_t b0 = src_raw_ptr[get_raw_byte<float>() * i + 0];
