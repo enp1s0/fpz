@@ -47,7 +47,7 @@ void test() {
 	std::printf("Exponent compression rate : %luByte -> %luByte (%7.3f)\n", uncompressed_size, compressed_size, 100. * compressed_size / uncompressed_size);
 	std::printf("Total compression rate    : %luByte -> %luByte (%7.3f)\n", uncompressed_size + raw_part_size,
 				compressed_size + raw_part_size,
-				100. * (compressed_size + raw_part_size) / (uncompressed_size + raw_part_size));
+				100. * (compressed_size + raw_part_size) / (sizeof(T) * N));
 
 	// inflate
 	fpz::inflate(com_array.data(), fpz::get_stream_com_blocks_bytes<T>(N), std::make_pair(std::move(compressed_data), compressed_size));
