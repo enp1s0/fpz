@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <chrono>
 #include <fpz/fpz.hpp>
 
 constexpr std::size_t N = 1lu << 20;
@@ -23,6 +24,7 @@ void test() {
 	std::uniform_int_distribution<int> exponent_dist(-100, 100);
 	std::uniform_int_distribution<int> sign_dist(0, 1);
 
+	const auto clock_0 = std::chrono::system_clock::now();
 	for (std::size_t i = 0; i < N; i++) {
 		const auto mantissa = mantissa_dist(mt);
 		const auto exponent = exponent_dist(mt);
@@ -32,6 +34,7 @@ void test() {
 		input_array[i] = fp;
 	}
 
+	const auto clock_1 = std::chrono::system_clock::now();
 	// decompose
 	fpz::decompose(
 		com_array.data(),
@@ -40,6 +43,7 @@ void test() {
 		N
 		);
 
+	const auto clock_2 = std::chrono::system_clock::now();
 	// deflate
 	auto [compressed_data, compressed_size] = fpz::deflate(com_array.data(), fpz::get_stream_com_blocks_bytes<T>(N));
 	const auto uncompressed_size = fpz::get_stream_com_blocks_bytes<T>(N);
@@ -49,9 +53,11 @@ void test() {
 				compressed_size + raw_part_size,
 				100. * (compressed_size + raw_part_size) / (sizeof(T) * N));
 
+	const auto clock_3 = std::chrono::system_clock::now();
 	// inflate
 	fpz::inflate(com_array.data(), fpz::get_stream_com_blocks_bytes<T>(N), std::make_pair(std::move(compressed_data), compressed_size));
 
+	const auto clock_4 = std::chrono::system_clock::now();
 	// compose
 	fpz::compose(
 		output_array.data(),
@@ -60,6 +66,7 @@ void test() {
 		N
 		);
 
+	const auto clock_5 = std::chrono::system_clock::now();
 
 	// validate
 	std::size_t num_errors = 0;
@@ -68,7 +75,13 @@ void test() {
 			num_errors++;
 		}
 	}
-	std::printf("Passed %8lu / %8lu restorings\n", (N - num_errors), N);
+	std::printf("Restoring test: Passed %8lu / %8lu elements\n", (N - num_errors), N);
+	std::printf("# Time break down\n");
+	std::printf("%15s: %e [s]\n", "init array"    , std::chrono::duration_cast<std::chrono::microseconds>(clock_1 - clock_0).count() * 1e-6);
+	std::printf("%15s: %e [s]\n", "fpz::compose"  , std::chrono::duration_cast<std::chrono::microseconds>(clock_2 - clock_1).count() * 1e-6);
+	std::printf("%15s: %e [s]\n", "fpz::deflate"  , std::chrono::duration_cast<std::chrono::microseconds>(clock_3 - clock_2).count() * 1e-6);
+	std::printf("%15s: %e [s]\n", "fpz::inflate"  , std::chrono::duration_cast<std::chrono::microseconds>(clock_4 - clock_3).count() * 1e-6);
+	std::printf("%15s: %e [s]\n", "fpz::decompose", std::chrono::duration_cast<std::chrono::microseconds>(clock_5 - clock_4).count() * 1e-6);
 }
 
 int main() {
