@@ -3,15 +3,20 @@
 #include <vector>
 #include <fpz/fpz.hpp>
 
-
 constexpr std::size_t N = 1lu << 20;
 
 template <class T>
+const char* get_type_name_str();
+template <> const char* get_type_name_str<float >() {return "float" ;}
+template <> const char* get_type_name_str<double>() {return "double";}
+
+template <class T>
 void test() {
+	std::printf("### TEST for %s ###\n", get_type_name_str<T>());
 	std::vector<T> input_array(N);
 	std::vector<T> output_array(N);
-	std::vector<typename fpz::byte_t> com_array(fpz::get_com_byte<T>() * N);
-	std::vector<typename fpz::byte_t> raw_array(fpz::get_raw_byte<T>() * N);
+	std::vector<typename fpz::byte_t> com_array(fpz::get_stream_com_blocks_bytes<T>(N));
+	std::vector<typename fpz::byte_t> raw_array(fpz::get_stream_raw_blocks_bytes<T>(N));
 
 	std::mt19937 mt(0);
 	std::uniform_real_distribution<T> mantissa_dist(1, 2);
@@ -36,16 +41,16 @@ void test() {
 		);
 
 	// deflate
-	auto [compressed_data, compressed_size] = fpz::deflate(com_array.data(), fpz::get_com_byte<T>() * N);
-	const auto uncompressed_size = fpz::get_com_byte<T>() * N;
-	const auto raw_part_size = fpz::get_raw_byte<T>() * N;
+	auto [compressed_data, compressed_size] = fpz::deflate(com_array.data(), fpz::get_stream_com_blocks_bytes<T>(N));
+	const auto uncompressed_size = fpz::get_stream_com_blocks_bytes<T>(N);
+	const auto raw_part_size = fpz::get_stream_raw_blocks_bytes<T>(N);
 	std::printf("Exponent compression rate : %luByte -> %luByte (%7.3f)\n", uncompressed_size, compressed_size, 100. * compressed_size / uncompressed_size);
 	std::printf("Total compression rate    : %luByte -> %luByte (%7.3f)\n", uncompressed_size + raw_part_size,
 				compressed_size + raw_part_size,
-				100. * (compressed_size + raw_part_size) / (uncompressed_size + raw_part_size));
+				100. * (compressed_size + raw_part_size) / (sizeof(T) * N));
 
 	// inflate
-	fpz::inflate(com_array.data(), fpz::get_com_byte<T>() * N, std::make_pair(std::move(compressed_data), compressed_size));
+	fpz::inflate(com_array.data(), fpz::get_stream_com_blocks_bytes<T>(N), std::make_pair(std::move(compressed_data), compressed_size));
 
 	// compose
 	fpz::compose(
@@ -54,6 +59,7 @@ void test() {
 		raw_array.data(),
 		N
 		);
+
 
 	// validate
 	std::size_t num_errors = 0;
@@ -67,4 +73,5 @@ void test() {
 
 int main() {
 	test<float>();
+	test<double>();
 }

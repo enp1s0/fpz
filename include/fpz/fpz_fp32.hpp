@@ -1,28 +1,29 @@
-#ifndef __FPZ_FPZ_F32_GPP__
-#define __FPZ_FPZ_F32_GPP__
+#ifndef __FPZ_FPZ_F32_HPP__
+#define __FPZ_FPZ_F32_HPP__
 #include "detail.hpp"
 
 namespace fpz {
 
 template <>
-constexpr unsigned get_stream_block_size<float>(){return 1;}
+constexpr std::size_t get_stream_block_size<float>(){return 1;}
 template <>
-constexpr unsigned get_com_byte<float>(){return 1;};
+constexpr std::size_t get_com_byte<float>(){return 1;};
 template <>
-constexpr unsigned get_raw_byte<float>(){return 3;};
+constexpr std::size_t get_raw_byte<float>(){return 3;};
 
 template <>
 void decompose<float>(
 		byte_t* const dst_com_ptr,
 		byte_t* const dst_raw_ptr,
 		const float* const src_ptr,
-		const unsigned num_stream_block
+		const std::size_t num_elements
 		) {
 	union reinterpretor {
 		std::uint32_t bs;
 		float fp;
 	};
-	for (unsigned i = 0; i < num_stream_block * get_stream_block_size<float>(); i++) {
+#pragma omp parallel for
+	for (std::size_t i = 0; i < num_elements * get_stream_block_size<float>(); i++) {
 		const auto bs = reinterpretor{.fp = src_ptr[i]}.bs;
 
 		// Store exponent
@@ -42,13 +43,14 @@ void compose<float>(
 		float* const dst_ptr,
 		const byte_t* const src_com_ptr,
 		const byte_t* const src_raw_ptr,
-		const unsigned num_stream_block
+		const std::size_t num_elements
 		) {
 	union reinterpretor {
 		std::uint32_t bs;
 		float fp;
 	};
-	for (unsigned i = 0; i < num_stream_block * get_stream_block_size<float>(); i++) {
+#pragma omp parallel for
+	for (std::size_t i = 0; i < num_elements * get_stream_block_size<float>(); i++) {
 		// Load mantissa and sign
 		const std::uint32_t b0 = src_raw_ptr[get_raw_byte<float>() * i + 0];
 		const std::uint32_t b1 = src_raw_ptr[get_raw_byte<float>() * i + 1];
